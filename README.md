@@ -74,6 +74,6 @@ Row  |                                               name | energy,calculated (k
 <details>
 <summary>Outliers dirtribution</summary>
 
-![info_vs_macronutrients-ratio_0-2](./tests/assets/analytics_of_input_data/info_vs_macronutrients-ratio_0-2.png)
+![info_vs_macronutrients-ratio_0-2](./tests/assets/analytics_of_input_data/energy_vs_macronutrients-ratio_0-2.png)
 
 </details>
