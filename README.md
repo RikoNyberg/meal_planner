@@ -1,15 +1,15 @@
 ## ambiguities
-1)
-Food that has over 0.4g/100g of alcohol will be removed (including rum-tiramisu).
+### 1. Alcohol
+Food that has over 0.4g/100g of alcohol will be removed (including tiramisu that includes rum).
 
-2)
+### 2. Salt and sodium
 If the amount of salt and sodium is not limited, the algorithm will suggest way too much salt and sodium. Hence, adding limitations to these too.
 
 Will also add possibility to choose low and high salt/sodium diet depending if you have too high levels or if you do a lot of sports where you are sweating and hence, need more salt/sodium.
 
-3)
-To improve the recommendations on top of the current constraints, I will list some food ingredients that are often used. This is to make sure that there is enough variation in the food the make it healthier and enjoyfull. 
-These ingredients are __chicken, pork, beef, ham, kebab, fish, cheese, hamburger, shrimp, porridge, pasta, salmon, cake.__
+### 3. Improved food categories
+To improve the recommendations on top of the current constraints I will list some common food ingredients to an "extra_categoty". This is to make sure that there is enough variation in the food and to make it healthier and more applealing. 
+> These "extra_categoty" ingredients are: __chicken, pork, beef, ham, kebab, fish, cheese, shrimp, porridge, hamburger, pasta, salmon, cake, lamb, tofu.__
 
 <details>
 <summary>Count of these ingredient in categories and foods</summary>
@@ -28,7 +28,18 @@ pasta     | 22 | 47  |
 shrimp    | 14 | 15  |
 salmon    | 19 | 34  |
 hamburger | 10 | 39  |
-kebab     |  6 | 7   |
+lamb      | 10 | 16  |
+tofu      | 9  | 11  |
+kebab     | 6  | 7   |
+
+</details>
+
+However, these categories could be improved even more but that is something to do in the future implementations.
+
+<details>
+<summary>Distribution for ingredient count per category</summary>
+
+![ingredient_count_per_category](./tests/assets/analytics_of_input_data/ingredient_count_per_category.png)
 
 </details>
 
@@ -38,7 +49,7 @@ The amount of energy (kcal or kJ) from a 1 gram of macronutrient is generally ca
 - 1g of protein = 4 kcal (17 kJ)
 - 1g of alcohol = 7 kcal (30 kJ) 
 - 1g of fat = 9 kcal (38 kJ)
-When calculating the energy sum of macronutrients of each food item in the [Fineli](https://fineli.fi/fineli/en/elintarvikkeet/resultset.csv) dataset, most of them are close to the the informer `energy,calculated (kJ)`. To be axact 96.8% of the informed energy was within -10% to +30% of the calculated energy sum of macronutrients. 
+When calculating the energy sum of macronutrients of each food item in the [Fineli](https://fineli.fi/fineli/en/elintarvikkeet/resultset.csv) dataset, most of them are close to the the informer `energy,calculated (kJ)`. To be exact 96.8% of the informed energy was within -10% to +30% of the calculated energy sum of macronutrients. 
 
 However, there are some products that are extreme outliers. This might be caused by some ingredients that are not listed in macronutrient but are added to the `energy,calculated (kJ)`. For example **fibre, xylitol and sorbitol** are not included in either sugar or carbs even though it clearly exists in the product energy calculated (kJ).
 
@@ -99,6 +110,6 @@ Row  |                                               name | energy,calculated (k
 <details>
 <summary>Outliers dirtribution</summary>
 
-![info_vs_macronutrients-ratio_0-2](./tests/assets/analytics_of_input_data/energy_vs_macronutrients-ratio_0-2.png)
+![energy_vs_macronutrients-ratio](./tests/assets/analytics_of_input_data/energy_vs_macronutrients-ratio_0-2.png)
 
 </details>
