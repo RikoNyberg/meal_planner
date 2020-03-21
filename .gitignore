@@ -2,3 +2,5 @@
 .DS_store
 resultset.csv
 fourkind/result.csv
+tests/asd.py
+fourkind/__pycache__
