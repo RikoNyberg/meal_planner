@@ -8,6 +8,31 @@ If the amount of salt and sodium is not limited, the algorithm will suggest way 
 Will also add possibility to choose low and high salt/sodium diet depending if you have too high levels or if you do a lot of sports where you are sweating and hence, need more salt/sodium.
 
 3)
+To improve the recommendations on top of the current constraints, I will list some food ingredients that are often used. This is to make sure that there is enough variation in the food the make it healthier and enjoyfull. 
+These ingredients are __chicken, pork, beef, ham, kebab, fish, cheese, hamburger, shrimp, porridge, pasta, salmon, cake.__
+
+<details>
+<summary>Count of these ingredient in categories and foods</summary>
+
+Ingredient | Category count this occurs | Food count this occurs |
+----------|----|-----|
+chicken   | 80 | 125 |
+beef      | 78 | 142 |
+pork      | 54 | 106 |
+cheese    | 44 | 108 |
+cake      | 38 | 118 |
+fish      | 37 | 83  |
+porridge  | 33 | 81  |
+ham       | 26 | 40  |
+pasta     | 22 | 47  |
+shrimp    | 14 | 15  |
+salmon    | 19 | 34  |
+hamburger | 10 | 39  |
+kebab     |  6 | 7   |
+
+</details>
+
+4)
 The amount of energy (kcal or kJ) from a 1 gram of macronutrient is generally calculated as following: 
 - 1g of carbs = 4 kcal (17 kJ)
 - 1g of protein = 4 kcal (17 kJ)
