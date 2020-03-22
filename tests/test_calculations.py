@@ -5,7 +5,7 @@ import sys
 sys.path.insert(0,'..')
 from fourkind import data_import
 
-df, _ = data_import.get_data()
+df = data_import.get_data()
 df_no_nan = df.copy().replace([np.inf, -np.inf], np.nan).dropna(subset=["kcal_ratio"])
 df = df.sort_values('kcal_ratio')
 df_no_nan = df_no_nan.sort_values('kcal_ratio')
@@ -30,6 +30,7 @@ def save_outliers_to_csv(df_orig):
 def save_energy_difference_distribution(df_no_nan):
     # Save the distribution of informed Energy and Sum of macronutrients energy difference
     # to get a picture what kind of how much outliers exist:
+    plt.clf()
     plot = df_no_nan[['kcal_ratio']].plot(
         kind='hist',
         bins=[x * 0.1 for x in range(5, 20)],
@@ -62,6 +63,7 @@ def print_extra_category_counts(df):
 
 def save_distribution_of_ingredient_count_per_category(df):
     category_dict = get_product_category_dict(df)
+    plt.clf()
     plt.bar(range(len(category_dict)), list(category_dict.values()), align='center')
     plt.xlabel('Count of categories')
     plt.ylabel('Count of ingredients per category')
