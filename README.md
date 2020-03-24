@@ -11,6 +11,8 @@ Will also add possibility to choose low and high salt/sodium diet depending if y
 To improve the recommendations on top of the current constraints I will list some common food ingredients to an "extra_categoty". This is to make sure that there is enough variation in the food and to make it healthier and more applealing. 
 > These "extra_categoty" ingredients are: __chicken, pork, beef, ham, kebab, fish, cheese, shrimp, porridge, hamburger, pasta, salmon, cake, lamb, tofu.__
 
+Constraints of this improvement is that one meal can get only 1 extra category. E.g. "Chicken Hamburger" get chicken an not hamburger because it is first in the list.
+
 <details>
 <summary>Count of these ingredient in categories and foods</summary>
 
@@ -43,7 +45,10 @@ However, these categories could be improved even more but that is something to d
 
 </details>
 
-4)
+### 4. Previous meals
+To improve the meal plans I will add a constraint so that the system won't recommend meals that you have had in the same week. Without these contraints the meal planner will suggest you two different meals per every other day.
+
+### 5.
 The amount of energy (kcal or kJ) from a 1 gram of macronutrient is generally calculated as following: 
 - 1g of carbs = 4 kcal (17 kJ)
 - 1g of protein = 4 kcal (17 kJ)

@@ -3,4 +3,5 @@
 resultset.csv
 fourkind/result.csv
 tests/asd.py
-fourkind/__pycache__
+*/__pycache__
+fourkind/meal_plans/*
