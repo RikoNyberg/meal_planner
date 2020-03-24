@@ -54,10 +54,10 @@ def validate_original_csv_schema(df):
         'fat, total (g)': pa.Column(pa.String),
         'carbohydrate, available (g)': pa.Column(pa.String),
         'protein, total (g)': pa.Column(pa.String),
-        # 'fibre, total (g)': pa.Column(pa.String), # can have NaN values
+        # 'fibre, total (g)': pa.Column(), # can have NaN values
         'sugars, total (g)': pa.Column(pa.String),
         'alcohol (g)': pa.Column(pa.String),
-        # 'sodium (mg)': pa.Column(pa.String), # can have NaN values
+        # 'sodium (mg)': pa.Column(), # can have NaN values
         'salt (mg)': pa.Column(pa.String),
     })
     return schema_csv_download.validate(df)
@@ -67,47 +67,18 @@ def clean_column(df, col_name):
     if is_string_dtype(df[col_name]):
         # NOTE: the estimate <0.1 creates a distortion in the data. Hence, removed.
         col = pd.to_numeric(df[col_name].map(
-            lambda x: x if x != '<0.1' else 0))
+            lambda x: x if x != '<0.1' else 0.0))
     else:
         col = df[col_name]
     return col.replace([np.inf, -np.inf], np.nan).fillna(0)
 
 
-def get_extra_category_list(df):
-    """
-    These are more general categories to improve the variety of meal plans.
-
-    Note that the list orger matters! 
-    One meal can get only 1 extra category. 
-    E.g. "Chicken Hamburger" get chicken an not hamburger because it is first in the list.
-
-    Also note that short category names might get unwanted matches because the matching is simple.
-    E.g. 'ham' --> 'ham|burger' or 'c|ham|pignon soup'.
-
-    Due to these restrictions be careful on what you add here and in which order.
-    """
-    extra_categories = ['chicken', 'pork', 'beef', 'kebab', 'fish', 'cheese', 'shrimp', 'porridge',
-                        'lamb', 'tofu', 'salmon', 'hamburger', ' ham', 'ham ', 'pasta', 'cake', 'rice', 'protein']
-    extra_category_list = []
-
-    def get_extra_category_value(row):
-        for extra_c in extra_categories:
-            if extra_c in row['name'].lower():
-                return extra_c
-        return ''
-
-    for i, row in df.iterrows():
-        extra_category_list.append(get_extra_category_value(row))
-
-    return extra_category_list
-
-
 def add_necessary_columns(df):
-    df['category'], _, _ = df['name'].str.split(', ', 2).str
+    df['category'], _ = df['name'].str.split(', ', 1).str
     df['extra_category'] = get_extra_category_list(df)
 
     df['kcal'] = clean_column(
-        df, 'energy,calculated (kJ)') / 4.184  # NOTE: kJ -> kcal
+        df, 'energy,calculated (kJ)') / 4.184  # kJ -> kcal
     df['fat_kcal'] = clean_column(df, 'fat, total (g)') * 9
     df['carb_kcal'] = clean_column(df, 'carbohydrate, available (g)') * 4
     df['protein_kcal'] = clean_column(df, 'protein, total (g)') * 4
@@ -139,6 +110,35 @@ def add_necessary_columns(df):
 
     validated_df = schema_added_columns.validate(df)
     return validated_df
+
+
+def get_extra_category_list(df):
+    """
+    These are more general categories to improve the variety of meal plans.
+
+    Note that the list orger matters!
+    One meal can get only 1 extra category.
+    E.g. "Chicken Hamburger" get chicken an not hamburger because it is first in the list.
+
+    Also note that short category names might get unwanted matches because the matching is simple.
+    E.g. 'ham' --> 'ham|burger' or 'c|ham|pignon soup'.
+
+    Due to these restrictions be careful on what you add here and in which order.
+    """
+    extra_categories = ['chicken', 'pork', 'beef', 'kebab', 'fish', 'cheese', 'shrimp', 'porridge',
+                        'lamb', 'tofu', 'salmon', 'hamburger', ' ham', 'ham ', 'pasta', 'cake', 'rice', 'protein']
+    extra_category_list = []
+
+    def get_extra_category_value(row):
+        for extra_c in extra_categories:
+            if extra_c in row['name'].lower():
+                return extra_c
+        return ''
+
+    for i, row in df.iterrows():
+        extra_category_list.append(get_extra_category_value(row))
+
+    return extra_category_list
 
 
 def clean_data(df):
