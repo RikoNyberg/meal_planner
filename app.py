@@ -1,15 +1,15 @@
 from flask import Flask, request, redirect, url_for
 from flask import render_template
-import logging
-logging.basicConfig(format='%(message)s', level=logging.INFO)
 import pandas as pd
 import data_import
 import algorithm
 import glob
 import time
 import random
+import logging
+logging.basicConfig(format='%(message)s', level=logging.INFO)
 
-LOCAL = DEBUG = False  # False is for production
+LOCAL = DEBUG = True  # False is for production
 
 app = Flask(__name__)
 
@@ -43,18 +43,18 @@ def calculate(days, allergy, low_salt):
             prev_meal_plan=previous_day, 
             used_meals=used_meals)
         
-        print('-'*20, day_name.upper(), '-'*20)
+        logging.info('-'*20, 'Meal Plan:', day_name.upper(), '-'*20)
         meal_plan = day.get_optimal_meal_plan()
-        print(meal_plan)
+        logging.info(meal_plan)
 
         used_meals = pd.concat([used_meals, meal_plan])
         day.save_meal_plan_to_csv()
         day.save_total_nutrients_to_csv()
-        print(day.get_total_nutrients())
+        logging.info(day.get_total_nutrients())
         previous_day = day
 
     end = time.time()
-    print('-'*50, 'Running time:', end - start)
+    logging.info('-'*20, 'Running time:', end - start, '-'*20)
     return 
 
 
