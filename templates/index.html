@@ -26,8 +26,14 @@
 {% from "layout-footer.html" import footer %}
 {% from "layout-scripts.html" import scripts %}
 {% from "login.html" import login %}
+{% if wrong_password %}
+    <div class="alert alert-danger" role="alert" style="color:black;">
+        Your password was incorrect. Please check once more... A hint: where do you work?
+    </div>
+{% endif %}
 <body class="">
-  <div class="wrapper ">
+  <div class="wrapper">
+    
     <div class="main-panel">
       <div class="content">
         <div class="col-md-10">

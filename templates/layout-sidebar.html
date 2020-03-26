@@ -1,5 +1,5 @@
 {% macro add_sidebar_item(path, icon, name) %}
-    {% if request.path|trim("/") == path|trim("/") %}
+    {% if path|trim("/") == request.path.split("/")[1] %}
         <li class="nav-item active ">
     {% else %}
         <li class="nav-item ">
