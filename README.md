@@ -1,20 +1,23 @@
 # Meal planner 
-This is the front end of the meal_plan application that does plans meals for you using a meal dataset from [Fineli](https://fineli.fi/fineli/en/elintarvikkeet/resultset.csv)
+This is a "meal_plan" application that plans meals for you using a meal dataset from [Fineli](https://fineli.fi/fineli/en/elintarvikkeet/resultset.csv)
+
+## Run locally as a website
+After you have [Docker](https://www.docker.com/get-started) on your local machine, clone the repo and run the following command in the folder:
+```
+$ make run
+```
+After this the Meal Planner UI is served in your local port http://0.0.0.0:5000/ and http://0.0.0.0:5000/meal-plan.
 
 ## Run on a server as a website
 Instructions on how to setup https and Nginx-proxy for this website:
 [Host multiple websites with HTTPS on a single server](https://medium.com/@francoisromain/host-multiple-websites-with-https-inside-docker-containers-on-a-single-server-18467484ab95)
 
-First, you have to create an Nginx-proxy to your server for controlling the traffic ([simple instruction here](https://medium.com/@francoisromain/host-multiple-websites-with-https-inside-docker-containers-on-a-single-server-18467484ab95)). After that you can download the dashboard to your server and run the following commands inside the website folder.
+First, you have to create an Nginx-proxy to your server for controlling the traffic ([simple instruction here](https://medium.com/@francoisromain/host-multiple-websites-with-https-inside-docker-containers-on-a-single-server-18467484ab95)). After you have gone through the instructions and updated `docker-compose.yml`, you can just download this repo to your server and run the following command in the folder.
 ```
-$ cd .../meal_plan
-
-$ docker build -t meal_plan .
-
-$ docker-compose up -d
+$ make server
 ```
 
-Then just enjoy you meal planner :D
+Then just enjoy you meals :D
 
 Ps. If it does not work right away, it might take a few minutes to get the https certificate.
 
@@ -27,7 +30,25 @@ python -m unittest
 
 # Details about the Meal Plan application
 
-## Ambiguities
+## Requirements:
+1. Total calories per day should be as close to 2000 kcal as possible. 
+- The system is capable to produce exact number but due to roundings and unclear energy calculations (see Details section 7.) these are not exactly 2000 kcal always
+2. Energy division by macronutrients, as accurately as possible:
+- 50 % of energy should be from carbs - Done
+- 30 % from proteins - Done
+- 20 % from fat - Done
+3. At least 20 g of fiber per day
+- Due to rounding error, this might sometimes be under 20g and hence, the requirement is currently 25g in the algorithm.
+4. At most 500 g of a single food item per day
+- This limitation has no problems
+5. No items from the same food group (e.g. “cake” or “cheese”) on successive days 
+- If only looking at the successive days, the algorithm would only suggest two different meals every other day. Hence, to improve this requirement I have added categories (see Details section 3.) and expanded the restrictions of previous meals (see Details section 4.).
+6. At least 3 different food groups need to be chosen for every day
+- This constraint is satisfied naturally throughout all the other constraints
+ 
+
+
+## Details
 ### 1. Alcohol
 Food that has over 0.4g/100g of alcohol will be removed (including tiramisu that includes rum).
 
@@ -80,17 +101,23 @@ However, these categories could be improved even more but that is something to d
 </details>
 
 ### 4. Previous meals
-To improve your meal plans I will add a constraint so that the system will not recommend similar meal plans that you have had in the same week. Without assigned constraints, the meal planner will suggest two different meals every other day.
+To improve your meal plans I have added a constraint so that the system will not recommend similar meal plans that you have had in the same week. This is done by locking used meals and releasing them evenly during a long period of time in random order.
+
+Without these improved constraints, the meal planner will suggest two different meals every other day.
 
 ### 5. Allergies
 Now I have added one optional allergy constraint which gives you a possibility to rule out any food that has Lactose.
 
-### 6.
+### 6. Improving the meal plans with better data
+In future these meal plans could be improved by going throught that Fineli data and cleaning. Also trying to find more relevant food/meal databanks could improve the quality and variety of these meal plans.
+
+### 7. The actula amount of energy of every meal
 The amount of energy (kcal or kJ) from a 1 gram of macronutrient is generally calculated as follows:
 - 1g of carbs = 4 kcal (17 kJ)
 - 1g of protein = 4 kcal (17 kJ)
 - 1g of alcohol = 7 kcal (30 kJ) 
 - 1g of fat = 9 kcal (38 kJ)
+
 When calculating the energy sum of macronutrients of each food item in the [Fineli](https://fineli.fi/fineli/en/elintarvikkeet/resultset.csv) dataset, most of them are close to the informer `energy,calculated (kJ)`. To be exact 96.8% of the informed energy was within -10% to +30% of the calculated energy sum of macronutrients. 
 
 However, there are some products that are extreme outliers. This might be caused by some ingredients that are not listed in macronutrient but are added to the `energy,calculated (kJ)`. For example **fibre, xylitol, and sorbitol** are not included in either sugar or carbs even though it clearly exists in the product energy calculated (kJ).

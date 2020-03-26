@@ -36,7 +36,7 @@ class DailyMealPlan():
             return default if not limits_dict.get(limit_name) else limits_dict[limit_name]
 
         # Mandatory
-        self.fibre_limit = get_limit('fibre_limit', 20, limits)
+        self.fibre_limit = get_limit('fibre_limit', 25, limits)
         self.kcal_limit = get_limit('kcal_limit', 2000, limits)
         self.carb_kcal_limit = get_limit(
             'carb_kcal_limit', self.kcal_limit*0.5, limits)
