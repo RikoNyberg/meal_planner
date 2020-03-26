@@ -1,0 +1,43 @@
+{% macro login(city) %}
+<div class="modal fade" id="loginModal" tabindex="-1" role="">
+    <div class="modal-dialog modal-login" role="document">
+        <div class="modal-content">
+            <div class="card card-signup card-plain">
+                <div class="modal-body">
+                    <form class="form" method="post" action="/login">
+                        <div class="card-body">
+                            <!-- <div class="form-group bmd-form-group">
+                                <div class="input-group">
+                                  <div class="input-group-prepend">
+                                    <div class="input-group-text"><i class="material-icons">email</i></div>
+                                  </div>
+                                  <input type="email" class="form-control" placeholder="Email..." name="email"> 
+                                </div>
+                            </div> -->
+                            <div class="form-group bmd-form-group">
+                                <div class="input-group">
+                                  <div class="input-group-prepend">
+                                    <div class="input-group-text"><i class="material-icons">lock_outline</i></div>
+                                  </div>
+                                  <input type="password" placeholder="Password..." name="password" class="form-control" pattern=".{4,}">
+                                </div>
+                            </div>
+                            <div class="form-group bmd-form-group">
+                              <div class="input-group">
+                                <div class="input-group-prepend">
+                                  <div class="input-group-text"><i class="material-icons">date_range</i></div>
+                                </div>
+                                <input type="number" placeholder="How many days of Meal Plans?.. between 1 to 30" name="days" class="form-control" max=30 min=1>
+                              </div>
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <button type="submit" class="btn btn-primary btn-lg center">Log In</button>
+                        </div>
+                      </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}

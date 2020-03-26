@@ -1,0 +1,72 @@
+{% extends "layout.html" %} {% block title %}Feedback{% endblock %} 
+{% block content %}
+{% if feedback %}
+    <div class="alert alert-success" role="alert">
+        Thank you! The <a href="#" class="alert-link">feedback has been submitted</a>. We will be in touch in the next two weeks.
+    </div>
+{% endif %}
+<div class="container-fluid">
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header card-header-primary">
+            <h4 class="card-title">User Feedback on Meal Planner</h4>
+            <p class="card-category">Your feedback is extremely welcome! We will be in touch with you in the next two weeks.</p>
+          </div>
+          <div class="card-body">
+            <form class="form" method="post" action="/feedback">
+              <input type="hidden" name="feedback" value="some_feedback">
+              <div class="row">
+                <div class="col-md-5">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Company</label>
+                    <input type="text" class="form-control">
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Username</label>
+                    <input type="text" class="form-control">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Email address</label>
+                    <input type="email" class="form-control">
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Problem Priority</label>
+                    <input type="text" class="form-control">
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Problem Category</label>
+                    <input type="text" class="form-control">
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label>Feedback</label>
+                    <div class="form-group">
+                      <label class="bmd-label-floating"> Anything that comes in mind.</label>
+                      <textarea class="form-control" rows="5"></textarea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary pull-right">Send Feedback</button>
+              <div class="clearfix"></div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock %}  

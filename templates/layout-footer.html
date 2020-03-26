@@ -1,0 +1,28 @@
+{% macro footer() %}
+<footer class="footer">
+  <div class="container-fluid">
+    <nav class="float-left">
+      <ul>
+        <li>
+          <a href="https://riko.io/">
+            About Us
+          </a>
+        </li>
+        <li>
+          <a href="https://riko.io/">
+            Licenses
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <div class="copyright float-right">
+      &copy;
+      <script>
+        document.write(new Date().getFullYear());
+      </script>
+      , made with <i class="material-icons">favorite</i> by
+      <a href="https://riko.io" target="_blank">riko.io</a>
+    </div>
+  </div>
+</footer>
+{% endmacro %}

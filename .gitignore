@@ -1,7 +1,9 @@
+local
+examples
+docs
+.DS_Store
 .vscode
-.DS_store
 resultset.csv
-fourkind/result.csv
-tests/asd.py
 */__pycache__
-fourkind/daily_meal_plans/*
+daily_meal_plans/*.csv
+__pycache__

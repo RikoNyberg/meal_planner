@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import sys
 sys.path.insert(0, '..')
-from fourkind import data_import
+import data_import
 
 
 df = data_import.get_data()

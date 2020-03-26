@@ -4,7 +4,7 @@ import pandera as pa
 
 import sys
 sys.path.insert(0, '..')
-from fourkind import data_import
+import data_import
 
 
 class TestDataImport(unittest.TestCase):
@@ -49,6 +49,7 @@ class TestDataImport(unittest.TestCase):
             'alcohol (g)': ['0.0'],
             'sodium (mg)': ['87.8'],
             'salt (mg)': ['470.1'],
+            'lactose (g)': ['2.1'],
         }
         df_test = pd.DataFrame(data)
         df = data_import.add_necessary_columns(df_test)
@@ -67,6 +68,7 @@ class TestDataImport(unittest.TestCase):
             'sodium': pa.Column(pa.Float, pa.Check(lambda s: s >= 0)),
             'salt': pa.Column(pa.Float, pa.Check(lambda s: s >= 0)),
             'kcal_ratio': pa.Column(pa.Float, pa.Check(lambda s: s >= 0)),
+            'lactose': pa.Column(pa.Float, pa.Check(lambda s: s >= 0)),
         })
 
         df_valid = schema_added_columns.validate(df)

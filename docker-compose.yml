@@ -1,0 +1,17 @@
+version: "3.7"
+
+services:
+  my-app:
+    image: meal_plan
+    environment:
+      VIRTUAL_HOST: meal.riko.io
+      VIRTUAL_PORT: 5000
+      LETSENCRYPT_HOST: meal.riko.io
+      LETSENCRYPT_EMAIL: riko@riko.io
+    expose:
+      - 5000
+        
+networks:
+  default:
+    external:
+      name: nginx-proxy

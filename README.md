@@ -1,20 +1,54 @@
-## ambiguities
+# Meal planner 
+This is the front end of the meal_plan application that does plans meals for you using a meal dataset from [Fineli](https://fineli.fi/fineli/en/elintarvikkeet/resultset.csv)
+
+## Run on a server as a website
+Instructions on how to setup https and Nginx-proxy for this website:
+[Host multiple websites with HTTPS on a single server](https://medium.com/@francoisromain/host-multiple-websites-with-https-inside-docker-containers-on-a-single-server-18467484ab95)
+
+First, you have to create an Nginx-proxy to your server for controlling the traffic ([simple instruction here](https://medium.com/@francoisromain/host-multiple-websites-with-https-inside-docker-containers-on-a-single-server-18467484ab95)). After that you can download the dashboard to your server and run the following commands inside the website folder.
+```
+$ cd .../meal_plan
+
+$ docker build -t meal_plan .
+
+$ docker-compose up -d
+```
+
+Then just enjoy you meal planner :D
+
+Ps. If it does not work right away, it might take a few minutes to get the https certificate.
+
+
+## Run tests
+```
+python -m unittest
+```
+
+
+# Details about the Meal Plan application
+
+## Ambiguities
 ### 1. Alcohol
 Food that has over 0.4g/100g of alcohol will be removed (including tiramisu that includes rum).
 
 ### 2. Salt and sodium
-If the amount of salt and sodium is not limited, the algorithm may suggest way too much salt and sodium. However, the best meal plans come without these limitations so I will add a not-default option for this limitation too.
-
-Will also add possibility to choose low and high salt/sodium diet depending if you have too high levels or if you do a lot of sports where you are sweating and hence, need more salt/sodium.
+If the amount of salt/sodium is not limited, the algorithm may suggest way too much salt and sodium. Hence, I will add an option to limit salt.
 
 ### 3. Improved food categories
-To improve the recommendations on top of the current constraints I will list some common food ingredients to an "extra_categoty". This is to make sure that there is enough variation in the food and to make it healthier and more applealing. 
+The categories in the dataset seem to work as following:
+```
+Food_1: "Hamburger, Chicken Burger, Mcdonald'S" --> category "Hamburger"
+Food_2: "Yoghurt, Flavoured, 7% Fat" --> category "Yoghurt"
+```
+So it seems that the first section if the category (when divided by comma) and the following sections are some extra info.
+
+To improve the recommendations, on top of the current constraints, I will list some common food ingredients to an "extra_categoty". This is to make sure that there is enough variation in the food so that it is healthier and more appealing. 
 > These "extra_categoty" ingredients are: __chicken, pork, beef, ham, kebab, fish, cheese, shrimp, porridge, hamburger, pasta, salmon, cake, lamb, tofu.__
 
-Constraints of this improvement is that one meal can get only 1 extra category. E.g. "Chicken Hamburger" get chicken an not hamburger because it is first in the list.
+Constraint of this improvement is that one meal can get only 1 extra category. E.g. "Chicken Hamburger, Mcdonald'S" get chicken an not hamburger because it is first in the list.
 
 <details>
-<summary>Count of these ingredient in categories and foods</summary>
+<summary>Count of these ingredient in categories (first section) and foods (the whole food name)</summary>
 
 Ingredient | Category count this occurs | Food count this occurs |
 ----------|----|-----|
@@ -36,7 +70,7 @@ kebab     | 6  | 7   |
 
 </details>
 
-However, these categories could be improved even more but that is something to do in the future implementations.
+However, these categories could be improved even more but that is something to do in future implementations.
 
 <details>
 <summary>Distribution for ingredient count per category</summary>
@@ -46,19 +80,22 @@ However, these categories could be improved even more but that is something to d
 </details>
 
 ### 4. Previous meals
-To improve the meal plans I will add a constraint so that the system won't recommend meals that you have had in the same week. Without these contraints the meal planner will suggest you two different meals per every other day.
+To improve your meal plans I will add a constraint so that the system will not recommend similar meal plans that you have had in the same week. Without assigned constraints, the meal planner will suggest two different meals every other day.
 
-### 5.
-The amount of energy (kcal or kJ) from a 1 gram of macronutrient is generally calculated as following: 
+### 5. Allergies
+Now I have added one optional allergy constraint which gives you a possibility to rule out any food that has Lactose.
+
+### 6.
+The amount of energy (kcal or kJ) from a 1 gram of macronutrient is generally calculated as follows:
 - 1g of carbs = 4 kcal (17 kJ)
 - 1g of protein = 4 kcal (17 kJ)
 - 1g of alcohol = 7 kcal (30 kJ) 
 - 1g of fat = 9 kcal (38 kJ)
-When calculating the energy sum of macronutrients of each food item in the [Fineli](https://fineli.fi/fineli/en/elintarvikkeet/resultset.csv) dataset, most of them are close to the the informer `energy,calculated (kJ)`. To be exact 96.8% of the informed energy was within -10% to +30% of the calculated energy sum of macronutrients. 
+When calculating the energy sum of macronutrients of each food item in the [Fineli](https://fineli.fi/fineli/en/elintarvikkeet/resultset.csv) dataset, most of them are close to the informer `energy,calculated (kJ)`. To be exact 96.8% of the informed energy was within -10% to +30% of the calculated energy sum of macronutrients. 
 
-However, there are some products that are extreme outliers. This might be caused by some ingredients that are not listed in macronutrient but are added to the `energy,calculated (kJ)`. For example **fibre, xylitol and sorbitol** are not included in either sugar or carbs even though it clearly exists in the product energy calculated (kJ).
+However, there are some products that are extreme outliers. This might be caused by some ingredients that are not listed in macronutrient but are added to the `energy,calculated (kJ)`. For example **fibre, xylitol, and sorbitol** are not included in either sugar or carbs even though it clearly exists in the product energy calculated (kJ).
 
-This makes sense to some level because fibre does not really contribute calories to the body, in a roundabout way ([source](https://www.ncbi.nlm.nih.gov/pubmed/30805214)).  On the other hand Sorbitol and Xylitol include calories, about 2.5 calories per gram, but that is significantly less than normal sugar which is about 4 calories per gram, but they don't seem to be calculated as sugar at all. See the problem cases under here:
+This makes sense to some level because fibre does not really contribute calories to the body, in a roundabout way ([source](https://www.ncbi.nlm.nih.gov/pubmed/30805214)).  On the other hand, Sorbitol and Xylitol include calories, about 2.5 calories per gram, but that is significantly less than normal sugar which is about 4 calories per gram, but they don't seem to be calculated as sugar at all. See the problem cases under here:
 
 Row |                           name  |energy,calculated (kJ) | fat, total (g) | carbohydrate, available (g) | protein, total (g) | fibre, total (g) | sugars, total (g) | alcohol (g)|
 ----|---------------------------------|-----------------------|----------------|-----------------------------|--------------------|------------------|-------------------|------------|

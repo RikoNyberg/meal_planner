@@ -1,0 +1,38 @@
+{% macro add_sidebar_item(path, icon, name) %}
+    {% if request.path|trim("/") == path|trim("/") %}
+        <li class="nav-item active ">
+    {% else %}
+        <li class="nav-item ">
+    {% endif %}
+    {% if path == "/favorites" %}
+            <a class="nav-link" onclick="md.showNotification('top','center')">
+    {% else %}
+            <a class="nav-link" href="{{ path }}">
+    {% endif %}
+                <i class="material-icons">{{ icon }}</i>
+                <p>{{ name }}</p>
+            </a>
+        </li>
+{% endmacro %}
+
+{% macro sidebar() %}
+<div class="sidebar" data-color="purple" data-background-color="white" data-image="{{ url_for('static', filename='img/sidebar-1.jpg') }}">
+    
+  <div class="logo">
+    <a href="#" class="simple-text logo-normal">
+        Meal Planner
+      </a></div>
+    <div class="sidebar-wrapper">
+      <ul class="nav">
+        {{ add_sidebar_item("/meal-plan", "restaurant", "Meal Plan") }}
+        {{ add_sidebar_item("/favorites", "favorites", "Favorites") }}
+        <!-- {{ add_sidebar_item("/map", "location_ons", "Prospects on Map") }} -->
+        <li class="nav-item active-pro ">
+          <a class="nav-link" href="/feedback">
+            <i class="material-icons">unarchive</i>
+            <p>Send User Feedback</p>
+          </a>
+        </li>
+      </ul>
+    </div>
+{% endmacro %}

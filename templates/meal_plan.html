@@ -1,0 +1,209 @@
+{% extends "layout.html" %} {% block title %}Meal Plans{% endblock %} 
+{% block content %}
+<div class="container-fluid">
+<!-- Modal -->
+{% for i in range(nutrients|length) %}
+<div class="modal fade" id="exampleModal{{i}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel{{i}}" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+
+    <div class="modal-body">
+      <div class="card card-profile">
+        <div class="card-avatar">
+          <a href="javascript:;">
+            <img class="img" src="../static/img/food/{{i % 13}}.jpg" />
+          </a>
+        </div>
+        <div class="card-body">
+          <h6 class="card-category text-gray">Meal Info</h6>
+          <h4 class="card-title">Day {{i+1}} Nutrients</h4>
+          <p class="card-description">
+            Here you find the overall nutrients off the daily meal plan.
+          </p>
+          <table>
+            <p class="description text-center">Has {{nutrients[i]['sugar'][0]}} grams of sugar</p>
+            <div class="card-body">
+
+                <div class="form-group bmd-form-group">
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <div class="input-group-text">{{(nutrients[i]['carb_kcal'][0] / nutrients[i]['kcal'][0] * 100)|round }}% kcal from carbs ({{nutrients[i]['carb_kcal'][0]}}kcal)</div>
+                      </div>
+                    </div>
+                </div>
+                <div class="form-group bmd-form-group">
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <div class="input-group-text">{{(nutrients[i]['protein_kcal'][0] / nutrients[i]['kcal'][0] * 100)|round }}% kcal from protein ({{nutrients[i]['protein_kcal'][0]}}kcal)</div>
+                      </div>
+                    </div>
+                </div>
+                <div class="form-group bmd-form-group">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <div class="input-group-text">{{(nutrients[i]['fat_kcal'][0] / nutrients[i]['kcal'][0] * 100)|round }}% kcal from fat ({{nutrients[i]['fat_kcal'][0]}}kcal)</div>
+                    </div>
+                  </div>
+              </div>
+              <div class="form-group bmd-form-group">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <div class="input-group-text">{{nutrients[i]['fibre'][0]}}g of Fibre</div>
+                  </div>
+                </div>
+            </div>
+            <div class="form-group bmd-form-group">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">{{nutrients[i]['lactose'][0]}}g of Lactose</div>
+                </div>
+              </div>
+          </div>
+            </div>
+          </table>
+          <button class="btn btn-primary btn-round"><i class="material-icons">favorite</i> Save to Favorites</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+{% endfor %}
+<!-- Modal ends -->
+<div class="row">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header card-header-primary">
+        <h4 class="card-title">Update ypur meal plan according to you preferences</h4>
+        <p class="card-category">Note that Generating new meal plans will take 2 to 60 minutes (2 min per day). Normally the system will use pre-generated meal plans with your preferences.</p>
+      </div>
+      <div class="card-body">
+        <form class="form" method="post" action="/upadate-meal-plan">
+          <div class="row">
+            <div class="col-md-3">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <div class="input-group-text"><i class="material-icons">date_range</i></div>
+                </div>
+                <input type="number" placeholder="Meal Plan days? (1 to 30)" name="days" class="form-control" max=30 min=1 required>
+              </div>
+            </div>
+            <div class="col-md-1">
+              <div class="form-group">
+                <input type="checkbox" class="form-control" name="low_salt" value="low_salt">
+                <label class="bmd-label-floating">Low salt</label>
+              </div>
+            </div>
+            <div class="col-md-1">
+              <div class="form-group">
+                <input type="checkbox" class="form-control" name="allergy" value="lactose">
+                <label class="bmd-label-floating">Allergic to lactose</label>
+              </div>
+            </div>
+            <div class="col-md-1">
+              <div class="form-group">
+                <input type="checkbox" class="form-control" name="min_sugar" value="min_sugar" checked>
+                <label class="bmd-label-floating">Minimize the sugar</label>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="form-group">
+                <input type="checkbox" class="form-control" name="new_meal_plan" value="new_meal_plan">
+                <label class="bmd-label-floating">Generate New Meal Plans</label>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <button type="submit" class="btn btn-primary pull-right">Update Meal Plan</button>
+            </div>
+            <div class="col-md-2">
+              <!-- <button type="submit" class="btn btn-primary pull-right">Get Random Meal Plan</button> -->
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+  {% for i in range(meal_plans|length) %}
+  {% if i % 2 == 0 %}
+  <div class="row">
+   {% endif %}
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header card-header-primary">
+          <h4 class="card-title ">Day {{i+1}}</h4>
+          <p class="card-category">Meal Plan</p>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table">
+              <thead class=" text-primary">
+                <th>
+                  Food
+                </th>
+                <th>
+                  kcal
+                </th>
+                <th>
+                  Grams
+                </th>
+                <th>
+                  Sugar (g)
+                </th>
+                <th>
+                  Salt (g)
+                </th>
+                <th>
+                  Fibre (g)
+                </th>
+              </thead>
+              <tbody>
+                {% for j in range(meal_plans[i]['name']|length) %}
+                  {% if j == meal_plans[i]['name']|length - 1 %}
+                  <tr bgcolor="#fafafa">
+                  {% else %}
+                  <tr>
+                  {% endif %}
+                  {% if j == meal_plans[i]['name']|length - 1 %}
+                  <td class="td-actions ">
+                    {{meal_plans[i]['name'][j]}}
+                    <button type="button" rel="tooltip" class="btn btn-info" data-toggle="modal" data-target="#exampleModal{{i}}" style="float: right;">
+                      <i class="material-icons">info</i>
+                    </button>
+                  </td>
+                  {% else %}
+                  <td>
+                    {{meal_plans[i]['name'][j]}}
+                    {% endif %}
+                  </td>
+                    <td>
+                      {{meal_plans[i]['kcal'][j]}}
+                    </td>
+                    <td>
+                      {{meal_plans[i]['grams'][j]}}
+                    </td>
+                    <td class="text-primary">
+                      {{meal_plans[i]['sugar'][j]}}
+                    </td>
+                    <td>
+                      {{meal_plans[i]['salt'][j]}}
+                    </td>
+                    <td>
+                      {{meal_plans[i]['fibre'][j]}}
+                    </td>
+
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% if i % 2 == 1 %}
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+
+  <meta property="og:image" content="{{ url_for('static', filename='img/meal-icon.png') }}" />
+  <meta property="og:description" content="This Meal Planner helps you to plan healthy and stable meals for every day"/>
+  <meta property="og:url" content="http://meal.riko.io/" />
+  <meta property="og:title" content="Meal Planner - For Your Healthier Life" />
+
+  <link rel="apple-touch-icon" sizes="76x76" href="{{ url_for('static', filename='img/meal-icon.png') }}">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/meal-icon.png') }}">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <title>
+    {% block title %}Meal Plans{% endblock %}
+  </title>
+  <meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
+  <!--     Fonts and icons     -->
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+  <!-- CSS Files -->
+  <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet" />
+</head>
+
+{% from "layout-sidebar.html" import sidebar %}
+{% from "layout-navbar.html" import navbar %}
+{% from "layout-footer.html" import footer %}
+{% from "layout-scripts.html" import scripts %}
+<body class="">
+  <div class="wrapper ">
+    {{sidebar()}}
+    </div>
+    <div class="main-panel">
+      {{navbar(days)}}
+      <div class="content">
+        {% block content %}{% endblock %}
+      </div>
+      {{footer()}}
+    </div>
+  </div>
+  {{scripts()}}
+  {% block script %}{% endblock %}
+</body>
+
+</html>
