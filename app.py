@@ -90,7 +90,10 @@ def get_nutrients_and_meal_plans(days, allergy=None, low_salt=None, min_sugar=Tr
         if min_sugar:
             sorted_tuples = sorted(info_dict.items())
         else:
-            sorted_tuples = sorted(info_dict.items(), key=lambda x: random.random())
+            sorted_tuples = sorted(info_dict.items())
+            # TODO: Commenting this because then there might be same food category on successive days
+            # Have to figure another way to shuffle the meal plans (algorithm level solution)
+            # sorted_tuples = sorted(info_dict.items(), key=lambda x: random.random())
 
         info_list = []
         count = 1
@@ -107,21 +110,24 @@ def get_nutrients_and_meal_plans(days, allergy=None, low_salt=None, min_sugar=Tr
         if low_salt:
             path = "daily_meal_plans/*_new_meal_plan_low_salt.csv"
         else:
-            path = "daily_meal_plans/*_new_meal_plan*.csv"
+            path = "daily_meal_plans/*_new_meal_plan.csv"
     else:
         if low_salt:
             path = "daily_meal_plans/*_meal_plan_low_salt.csv"
         else:
-            path = "daily_meal_plans/*_meal_plan*.csv"
+            path = "daily_meal_plans/*_meal_plan.csv"
     i = 1
     for fname in glob.glob(path):
         df = pd.read_csv(fname, sep=",")
         df = df.append(df.sum(numeric_only=True), ignore_index=True)
         df.loc[df.index[-1], 'name'] = 'Total'
         if allergy and df['lactose'].iloc[-1] != 0:
-            continue
+            continue # TODO: this causes a slight change of same food category on successive days
+                     # This can be fixed in the algorithm level
         df['salt'] = df['salt'].div(1000) # mg -> g
-        daily_meal_plans_dict[df['sugar'].iloc[-1]] = df.round(1).to_dict('list')
+        key = int(fname.split('/')[-1].split('_')[0])
+        daily_meal_plans_dict[key] = df.round(1).to_dict('list')
+        # daily_meal_plans_dict[df['sugar'].iloc[-1]] = df.round(1).to_dict('list')
         i += 1
     meal_plans = convert_info_to_list_of_dicts(daily_meal_plans_dict, min_sugar, days)
 
@@ -131,20 +137,23 @@ def get_nutrients_and_meal_plans(days, allergy=None, low_salt=None, min_sugar=Tr
         if low_salt:
             path = "daily_meal_plans/*_new_nutrients_low_salt.csv"
         else:
-            path = "daily_meal_plans/*_new_nutrients*.csv"
+            path = "daily_meal_plans/*_new_nutrients.csv"
     else:
         if low_salt:
             path = "daily_meal_plans/*_nutrients_low_salt.csv"
         else:
-            path = "daily_meal_plans/*_nutrients*.csv"
+            path = "daily_meal_plans/*_nutrients.csv"
     i = 1
     for fname in glob.glob(path):
         df = pd.read_csv(fname, sep=",")
         df = df.set_index('Unnamed: 0')
         df = df.T
         if allergy and df['lactose'].iloc[-1] != 0:
-            continue
-        daily_nutrients_dict[df['sugar'].iloc[-1]] = df.round(1).to_dict('list')
+            continue # TODO: this causes a slight change of same food category on successive days
+                     # This can be fixed in the algorithm level
+        key = int(fname.split('/')[-1].split('_')[0])
+        daily_meal_plans_dict[key] = df.round(1).to_dict('list')
+        # daily_nutrients_dict[df['sugar'].iloc[-1]] = df.round(1).to_dict('list')
         i += 1
     nutrients = convert_info_to_list_of_dicts(daily_nutrients_dict, min_sugar, days)
     
