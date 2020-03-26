@@ -9,7 +9,7 @@ import glob
 import time
 import random
 
-DEBUG = True  # False is for production
+LOCAL = DEBUG = False  # False is for production
 
 app = Flask(__name__)
 
@@ -66,12 +66,16 @@ def update_meal_plan():
     low_salt = True if request.form.get('low_salt') else False
     min_sugar = True if request.form.get('min_sugar') else False
     new_meal_plan = True if request.form.get('new_meal_plan') else False
-    if new_meal_plan:
+    if new_meal_plan and LOCAL:
         calculate(days, allergy, low_salt)
 
     meal_plans, nutrients = get_nutrients_and_meal_plans(
         days, allergy=allergy, low_salt=low_salt, min_sugar=min_sugar, new_meal_plan=new_meal_plan)
-    return render_template('meal_plan.html', meal_plans=meal_plans, nutrients=nutrients, days=days)
+
+    if LOCAL == False:
+        return render_template('meal_plan.html', meal_plans=meal_plans, nutrients=nutrients, days=days, server=True)
+    else:
+        return render_template('meal_plan.html', meal_plans=meal_plans, nutrients=nutrients, days=days)
 
 
 @app.route('/meal-plan')
@@ -109,7 +113,6 @@ def get_nutrients_and_meal_plans(days, allergy=None, low_salt=None, min_sugar=Tr
             path = "daily_meal_plans/*_meal_plan_low_salt.csv"
         else:
             path = "daily_meal_plans/*_meal_plan.csv"
-    print(path)
     i = 1
     for fname in glob.glob(path):
         df = pd.read_csv(fname, sep=",")
@@ -134,7 +137,6 @@ def get_nutrients_and_meal_plans(days, allergy=None, low_salt=None, min_sugar=Tr
             path = "daily_meal_plans/*_nutrients_low_salt.csv"
         else:
             path = "daily_meal_plans/*_nutrients.csv"
-    print(path)
     i = 1
     for fname in glob.glob(path):
         df = pd.read_csv(fname, sep=",")

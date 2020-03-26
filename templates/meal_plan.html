@@ -1,5 +1,10 @@
 {% extends "layout.html" %} {% block title %}Meal Plans{% endblock %} 
 {% block content %}
+{% if server %}
+    <div class="alert alert-info" role="alert">
+        Unfortunately this <a href="#" class="alert-link">Server does not have enough memory</a> to calculate and generate updated Meal Plans. However, here are some pre-calculated ones that fit your preferences.
+    </div>
+{% endif %}
 <div class="container-fluid">
 <!-- Modal -->
 {% for i in range(nutrients|length) %}
