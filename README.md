@@ -3,7 +3,7 @@
 Food that has over 0.4g/100g of alcohol will be removed (including tiramisu that includes rum).
 
 ### 2. Salt and sodium
-If the amount of salt and sodium is not limited, the algorithm will suggest way too much salt and sodium. Hence, adding limitations to these too.
+If the amount of salt and sodium is not limited, the algorithm may suggest way too much salt and sodium. However, the best meal plans come without these limitations so I will add a not-default option for this limitation too.
 
 Will also add possibility to choose low and high salt/sodium diet depending if you have too high levels or if you do a lot of sports where you are sweating and hence, need more salt/sodium.
 

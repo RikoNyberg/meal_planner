@@ -13,12 +13,23 @@ class DailyMealPlan():
         self.df = meals.copy()  # The df of food items
         self.integer = integer  # Is the meal_plan quantities calculated as int or continuous
         self.day = day
+        self.limits = limits
+
+        if self.limits.get('allergies'):  # e.g. lactose
+            for allergy in self.limits.get('allergies'):
+                self.df = self.df[self.df[allergy] < 0]
 
         print(f'All Meals:   {len(self.df)}')
         print(
             f'Used Meals:  {len(used_meals if used_meals is not None else [])}')
+
         if used_meals is not None:
+            remove_n = int(round(len(used_meals)*0.2))
+            drop_indices = np.random.choice(
+                used_meals.index, remove_n, replace=False)
+            used_meals.drop(drop_indices, inplace=True)
             self.df.drop(used_meals.index, inplace=True)
+            print(f'Removed {remove_n} foods from the used_meals list')
         print(f'All - Used = {len(self.df)}')
 
         if prev_meal_plan != None:
@@ -28,15 +39,19 @@ class DailyMealPlan():
             return default if not limits_dict.get(limit_name) else limits_dict[limit_name]
 
         # Mandatory
-        self.fibre_limit = get_limit('fibre_limit', 21, limits)
+        self.fibre_limit = get_limit('fibre_limit', 20, limits)
         self.kcal_limit = get_limit('kcal_limit', 2000, limits)
-        self.carb_kcal_limit = get_limit('carb_kcal_limit', 1000, limits)
-        self.protein_kcal_limit = get_limit('protein_kcal_limit', 600, limits)
-        self.fat_kcal_limit = get_limit('fat_kcal_limit', 400, limits)
+        self.carb_kcal_limit = get_limit(
+            'carb_kcal_limit', self.kcal_limit*0.5, limits)
+        self.protein_kcal_limit = get_limit(
+            'protein_kcal_limit', self.kcal_limit*0.3, limits)
+        self.fat_kcal_limit = get_limit(
+            'fat_kcal_limit', self.kcal_limit*0.2, limits)
 
         # Extra
-        self.salt_limit = get_limit('salt_limit', 5000, limits)
-        self.sodium_limit = get_limit('sodium_limit', 1500, limits)
+        if self.limits.get('low_salt'):
+            self.salt_limit = get_limit('salt_limit', 5000, limits)
+            self.sodium_limit = get_limit('sodium_limit', 2000, limits)
 
     def remove_previous_meal_plan_categories(self, prev_meal_plan):
         prev_df = prev_meal_plan.get_optimal_meal_plan()[
@@ -61,19 +76,22 @@ class DailyMealPlan():
         count = self.df['count']
 
         # Extra
-        salt = self.df['salt']  # (mg)
-        sodium = self.df['sodium']  # (mg)
+        if self.limits.get('low_salt'):
+            salt = self.df['salt']  # (mg)
+            sodium = self.df['sodium']  # (mg)
 
-        A_upperbounds = np.array([
-            count, -fibre, sodium, salt
+            A_upperbounds = np.array([count, -fibre, sodium, salt])
+            b_upperbounds = np.array(
+                [13, -self.fibre_limit, self.sodium_limit, self.salt_limit])
+        else:
+            A_upperbounds = np.array([count, -fibre])
+            b_upperbounds = np.array([13, -self.fibre_limit])
+
+        A_equality = np.array([
+            kcal, carb_kcal, protein_kcal, fat_kcal
         ])
-        b_upperbounds = np.array([
-            10, -self.fibre_limit, self.sodium_limit, self.salt_limit
-        ])
-        A_equality = np.array([kcal, carb_kcal, protein_kcal, fat_kcal])
-        b_equality = np.array([
-            self.kcal_limit, self.carb_kcal_limit, self.protein_kcal_limit, self.fat_kcal_limit
-        ])
+        b_equality = np.array(
+            [self.kcal_limit, self.carb_kcal_limit, self.protein_kcal_limit, self.fat_kcal_limit])
         bounds = [(0, 5) for x in range(self.df.shape[0])]
 
         solution = linprog(
@@ -125,7 +143,7 @@ class DailyMealPlan():
         # The five constraints are added to 'prob'
 
         prob += lpSum([kcal[i] * ingredient_vars[i]
-                       for i in ingredients]) <= self.kcal_limit, "kcal_sum"
+                       for i in ingredients]) == self.kcal_limit, "kcal_sum"
         prob += lpSum([carb_kcal[i] * ingredient_vars[i]
                        for i in ingredients]) == self.carb_kcal_limit, "carb_kcal_sum"
         prob += lpSum([protein_kcal[i] * ingredient_vars[i]
@@ -137,11 +155,12 @@ class DailyMealPlan():
                        for i in ingredients]) >= self.fibre_limit, "fibre_requirement"
 
         prob += lpSum([count[i] * ingredient_vars[i]
-                       for i in ingredients]) <= 10, "count_requirement"
-        prob += lpSum([sodium[i] * ingredient_vars[i]
-                       for i in ingredients]) <= self.sodium_limit, "sodium_requirement"
-        prob += lpSum([salt[i] * ingredient_vars[i]
-                       for i in ingredients]) <= self.salt_limit, "salt_requirement"
+                       for i in ingredients]) <= 20, "count_requirement"
+        if self.limits.get('low_salt'):
+            prob += lpSum([sodium[i] * ingredient_vars[i]
+                           for i in ingredients]) <= self.sodium_limit, "sodium_requirement"
+            prob += lpSum([salt[i] * ingredient_vars[i]
+                           for i in ingredients]) <= self.salt_limit, "salt_requirement"
 
         prob.solve()
 
@@ -149,10 +168,13 @@ class DailyMealPlan():
         ingr_grams = []
         i = 0
         for v in prob.variables():
-            ingr_grams.append(v.varValue * 100)
+            desi_grams = v.varValue if v.varValue >= 0.1 else 0
+            ingr_grams.append(desi_grams)
             if v.varValue:
                 i += 1
-        print(i)
+        kcal_sum = self.df['kcal'].mul(ingr_grams, axis=0).sum()
+        multiplier = self.kcal_limit / kcal_sum  # Force kcal to 2000
+        ingr_grams = [x * multiplier * 100 for x in ingr_grams]
 
         self.df['grams'] = ingr_grams
         self.daily_meal_plan_calculated = True
@@ -163,53 +185,38 @@ class DailyMealPlan():
             # self.calculate_optimal_meal_plan()
             self.calculate_optimal_meal_plan_continuous()
         info = ['name', 'count', 'grams', 'kcal', 'sugar', 'fibre', 'carb_kcal',
-                'protein_kcal', 'fat_kcal', 'salt', 'sodium', 'category', 'extra_category']
+                'protein_kcal', 'fat_kcal', 'salt', 'sodium', 'category',
+                'extra_category', 'lactose']
         df = self.df[info].copy()
 
         # Calculating meal plans nutrient quantities for each food
         nutrients = ['fibre', 'sugar', 'kcal', 'carb_kcal',
-                     'protein_kcal', 'fat_kcal', 'salt', 'sodium']
+                     'protein_kcal', 'fat_kcal', 'salt', 'sodium', 'lactose']
         # Rounding to nearest 10g and each nutrient is per 100g
         df_grams = df['grams'].round(-1).div(100)
         df[nutrients] = df[nutrients].multiply(df_grams, axis='index')
         df.sort_values(by='grams', ascending=False, inplace=True)
 
-        df = df[df['grams'] <= 10]  # taking only recommendations over 10 grams
+        df = df[df['grams'] >= 10]  # taking only recommendations over 10 grams
         df['grams'] = df['grams'].round(-1)  # Rounding to nearest 10g
         return df
 
     def get_total_nutrients(self):
         columns = ['count', 'grams', 'fibre', 'sugar', 'kcal',
-                   'carb_kcal', 'protein_kcal', 'fat_kcal', 'salt', 'sodium']
+                   'carb_kcal', 'protein_kcal', 'fat_kcal', 'salt', 'sodium', 'lactose']
         return self.get_optimal_meal_plan()[columns].sum()
 
     def save_total_nutrients_to_csv(self):
-        self.get_total_nutrients().to_csv(
-            f'meal_plans/{self.day}_nutrients.csv')
+        if self.limits.get('low_salt'):
+            csv_path = f'daily_meal_plans/{self.day}_nutrients_low_salt.csv'
+        else:
+            csv_path = f'daily_meal_plans/{self.day}_nutrients.csv'
+
+        self.get_total_nutrients().to_csv(csv_path)
 
     def save_meal_plan_to_csv(self):
-        self.get_optimal_meal_plan().to_csv(
-            f'meal_plans/{self.day}_meal_plan.csv')
-
-
-df = data_import.get_data()
-df = data_import.clean_data(df)
-
-previous_day = None
-used_meals = None
-start = time.time()
-for day_name in ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']:
-    day = DailyMealPlan(
-        df, day=day_name, prev_meal_plan=previous_day, used_meals=used_meals)
-    print('-'*20, day_name.upper(), '-'*20)
-    meal_plan = day.get_optimal_meal_plan()
-    print(meal_plan)
-
-    used_meals = pd.concat([used_meals, meal_plan])
-    day.save_meal_plan_to_csv()
-    day.save_total_nutrients_to_csv()
-    print(day.get_total_nutrients())
-    previous_day = day
-
-end = time.time()
-print('-'*50, 'Running time:', end - start)
+        if self.limits.get('low_salt'):
+            csv_path = f'daily_meal_plans/{self.day}_meal_plan_low_salt.csv'
+        else:
+            csv_path = f'daily_meal_plans/{self.day}_meal_plan.csv'
+        self.get_optimal_meal_plan().to_csv(csv_path)
