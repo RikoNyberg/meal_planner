@@ -47,7 +47,7 @@ python -m unittest
 - This constraint is satisfied naturally throughout all the other constraints
  
 7. Sufficient tests for loading the data from the url & seeing it fits the schema. Elegantly handle such a situation where these fail.
-- All the input data are san through a schema every time they are used and it will inform what are the problems if there are any. Data import tests can be also ran with `python -m unittest`
+- All the input data is run through a schema every time it is used in the algorithm. If there are any problems in the data, the system will inform what are the problems. Data import tests can be also ran with `python -m unittest`.
 
 ## Details
 ### 1. Alcohol
