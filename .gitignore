@@ -5,5 +5,4 @@ docs
 .vscode
 resultset.csv
 */__pycache__
-daily_meal_plans/*.csv
 __pycache__
