@@ -13,9 +13,8 @@ class DailyMealPlan():
         self.day = day
         self.limits = limits
 
-        if self.limits.get('allergies'):  # e.g. lactose
-            for allergy in self.limits.get('allergies'):
-                self.df = self.df[self.df[allergy] == 0]
+        if self.limits.get('allergies')[0] == 'lactose':
+            self.df = self.df[self.df['lactose'] == 0]
 
         print(f'All Meals:   {len(self.df)}')
         print(
