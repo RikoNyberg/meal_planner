@@ -16,9 +16,12 @@ def get_data():
     else:
         df = pd.read_csv('../resultset.csv', sep=";")
         df = validate_original_csv_schema(df)
+    
     wanted_columns = get_columns()
     df = df[wanted_columns]
     df = add_necessary_columns(df)
+    df = drop_unwanted_food(df)
+    df.to_csv('original.csv')
     return df
 
 
@@ -59,9 +62,17 @@ def validate_original_csv_schema(df):
         'alcohol (g)': pa.Column(pa.String),
         # 'sodium (mg)': pa.Column(), # can have NaN values
         'salt (mg)': pa.Column(pa.String),
+        # 'lactose (g)': pa.Column(pa.String), # can have NaN values
     })
     return schema_csv_download.validate(df)
 
+
+def drop_unwanted_food(df):
+    unwanted_food = [
+        'Baking Yeast', 'Sweetener', 'Salt', 'Sport Beverage', 'Meal Replacement',
+        'Egg White Powder', 'Gelatin', 'Flour Mixture', 'Flour', 'Baking Powder']
+    return df[~df['category'].isin(unwanted_food)]
+    
 
 def clean_column(df, col_name):
     if is_string_dtype(df[col_name]):
@@ -88,6 +99,8 @@ def add_necessary_columns(df):
     df['alc'] = clean_column(df, 'alcohol (g)')
     df['sodium'] = clean_column(df, 'sodium (mg)')
     df['salt'] = clean_column(df, 'salt (mg)')
+    df['lactose'] = clean_column(df, 'lactose (g)')
+    
 
     df['kcal_ratio'] = (df['kcal'] / (df['fat_kcal'] +
                                       df['carb_kcal'] + df['protein_kcal'] + df['alc_kcal']))
@@ -106,6 +119,7 @@ def add_necessary_columns(df):
         'sodium': pa.Column(pa.Float, pa.Check(lambda s: s >= 0)),
         'salt': pa.Column(pa.Float, pa.Check(lambda s: s >= 0)),
         # 'kcal_ratio': pa.Column(pa.Float), NOTE: might include nan values
+        'lactose': pa.Column(pa.Float, pa.Check(lambda s: s >= 0)),
     })
 
     validated_df = schema_added_columns.validate(df)
@@ -163,6 +177,7 @@ def get_columns():
         'alcohol (g)',  # NOTE: extra: no ALCOHOL
         'sodium (mg)',  # NOTE: extra: low salt
         'salt (mg)',  # NOTE: extra: low salt (lot of sports) MAX 5g/d (lapset 3g/d)
+        'lactose (g)',  # NOTE: extra: allergies
     ]
 
     # 1 Portion = 100g
