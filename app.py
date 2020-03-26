@@ -19,12 +19,11 @@ def home():
     return render_template('index.html')
 
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.form.get('password').lower() == 'fourkind':
         return redirect(url_for('meal_plan', days=request.form['days']))
-
+    return render_template('index.html', wrong_password=True)
 
 
 def calculate(days, allergy, low_salt):
