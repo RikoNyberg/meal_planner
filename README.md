@@ -1,6 +1,8 @@
 # Meal planner 
 This is a "meal_plan" application that plans meals for you using a meal dataset from [Fineli](https://fineli.fi/fineli/en/elintarvikkeet/resultset.csv)
 
+Demo: https://meal.riko.io/
+
 ## Run locally as a website
 After you have [Docker](https://www.docker.com/get-started) on your local machine, clone the repo and run the following command in the folder:
 ```
