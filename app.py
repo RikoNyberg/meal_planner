@@ -131,12 +131,12 @@ def get_nutrients_and_meal_plans(days, allergy=None, low_salt=None, min_sugar=Tr
         if low_salt:
             path = "daily_meal_plans/*_new_nutrients_low_salt.csv"
         else:
-            path = "daily_meal_plans/*_new_nutrients.csv"
+            path = "daily_meal_plans/*_new_nutrients*.csv"
     else:
         if low_salt:
             path = "daily_meal_plans/*_nutrients_low_salt.csv"
         else:
-            path = "daily_meal_plans/*_nutrients.csv"
+            path = "daily_meal_plans/*_nutrients*.csv"
     i = 1
     for fname in glob.glob(path):
         df = pd.read_csv(fname, sep=",")
