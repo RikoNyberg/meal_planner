@@ -1,17 +1,15 @@
 import pandas as pd
 import numpy as np
 from scipy.optimize import linprog
-from pulp import *
 # import logging
 import data_import
 import time
 
 
 class DailyMealPlan():
-    def __init__(self, df_meals, limits={}, prev_meal_plan=None, used_meals=None, integer=False, day='monday'):
+    def __init__(self, df_meals, limits={}, prev_meal_plan=None, used_meals=None, day='monday'):
         self.daily_meal_plan_calculated = False
         self.df = df_meals.copy()  # The df of food items
-        self.integer = integer  # Is the meal_plan quantities calculated as int or continuous
         self.day = day
         self.limits = limits
 
@@ -63,7 +61,7 @@ class DailyMealPlan():
             filter(lambda a: a != '', prev_df['extra_category'].tolist()))
         self.df = self.df[~self.df['extra_category'].isin(prev_extra_cat)]
 
-    def calculate_optimal_meal_plan_continuous(self):
+    def calculate_optimal_meal_plan(self):
         self.df['count'] = 1
         # Mandatory
         sugar = self.df['sugar']
@@ -103,85 +101,10 @@ class DailyMealPlan():
         self.df['grams'] = solution.x[solution.x > 0] * 100
         self.daily_meal_plan_calculated = True
 
-    def calculate_optimal_meal_plan(self):
-        self.df['count'] = 1
-        # Mandatory
-        sugar = self.df['sugar']
-        fibre = self.df['fibre']
-        kcal = self.df['kcal']
-        carb_kcal = self.df['carb_kcal']
-        protein_kcal = self.df['protein_kcal']
-        fat_kcal = self.df['fat_kcal']
-
-        # Extra
-        salt = self.df['salt']  # (mg)
-        sodium = self.df['sodium']  # (mg)
-        count = self.df['count']
-
-        # Creates a list of the ingredients
-        ingredients = self.df.index.tolist()
-
-        # Problem ('prob') variable to contain the problem data
-        prob = LpProblem("Optimal Meal Plan", LpMinimize)
-
-        # A dictionary called 'ingredient_vars' is created to contain the referenced Variables
-        if self.integer:
-            # logger.info("Calculating the meal plan with Integer Linear Programming so this might take a while (hours)...")
-            ingredient_vars = LpVariable.dicts(
-                "grams", ingredients, 0, 5, cat='Integer')
-        else:
-            # logger.info("Calculating the meal plan with Continuous functions, should take 5 to 10 minutes...")
-            ingredient_vars = LpVariable.dicts(
-                "grams", ingredients, 0, 5, cat='Continuous')
-
-        # The objective function is added to 'prob' first
-        prob += lpSum([sugar[i]*ingredient_vars[i]
-                       for i in ingredients]), "Total_Sugar_of_Meal_Plan"
-
-        # The five constraints are added to 'prob'
-
-        prob += lpSum([kcal[i] * ingredient_vars[i]
-                       for i in ingredients]) == self.kcal_limit, "kcal_sum"
-        prob += lpSum([carb_kcal[i] * ingredient_vars[i]
-                       for i in ingredients]) == self.carb_kcal_limit, "carb_kcal_sum"
-        prob += lpSum([protein_kcal[i] * ingredient_vars[i]
-                       for i in ingredients]) == self.protein_kcal_limit, "protein_kcal_sum"
-        prob += lpSum([fat_kcal[i] * ingredient_vars[i]
-                       for i in ingredients]) == self.fat_kcal_limit, "fat_kcal_sum"
-
-        prob += lpSum([fibre[i] * ingredient_vars[i]
-                       for i in ingredients]) >= self.fibre_limit, "fibre_requirement"
-
-        prob += lpSum([count[i] * ingredient_vars[i]
-                       for i in ingredients]) <= 20, "count_requirement"
-        if self.limits.get('low_salt'):
-            prob += lpSum([sodium[i] * ingredient_vars[i]
-                           for i in ingredients]) <= self.sodium_limit, "sodium_requirement"
-            prob += lpSum([salt[i] * ingredient_vars[i]
-                           for i in ingredients]) <= self.salt_limit, "salt_requirement"
-
-        prob.solve()
-
-        # Each of the variables is printed with it's resolved optimum value
-        ingr_grams = []
-        i = 0
-        for v in prob.variables():
-            desi_grams = v.varValue if v.varValue >= 0.1 else 0
-            ingr_grams.append(desi_grams)
-            if v.varValue:
-                i += 1
-        kcal_sum = self.df['kcal'].mul(ingr_grams, axis=0).sum()
-        multiplier = self.kcal_limit / kcal_sum  # Force kcal to 2000
-        ingr_grams = [x * multiplier * 100 for x in ingr_grams]
-
-        self.df['grams'] = ingr_grams
-        self.daily_meal_plan_calculated = True
-
     def get_optimal_meal_plan(self):
         if not self.daily_meal_plan_calculated:
             # logger.info("Optimizing today's meal plan...")
-            # self.calculate_optimal_meal_plan()
-            self.calculate_optimal_meal_plan_continuous()
+            self.calculate_optimal_meal_plan()
         info = ['name', 'count', 'grams', 'kcal', 'sugar', 'fibre', 'carb_kcal',
                 'protein_kcal', 'fat_kcal', 'salt', 'sodium', 'category',
                 'extra_category', 'lactose']
