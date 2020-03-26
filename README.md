@@ -32,7 +32,7 @@ python -m unittest
 
 ## Requirements:
 1. Total calories per day should be as close to 2000 kcal as possible. 
-- The system is capable to produce exact number but due to roundings and unclear energy calculations (see Details section 7.) these are not exactly 2000 kcal always
+- The system is capable to produce exact number but due to roundings and unclear energy calculations (see Details section 7.) these are not always exactly 2000 kcal.
 2. Energy division by macronutrients, as accurately as possible:
 - 50 % of energy should be from carbs - Done
 - 30 % from proteins - Done
@@ -46,7 +46,8 @@ python -m unittest
 6. At least 3 different food groups need to be chosen for every day
 - This constraint is satisfied naturally throughout all the other constraints
  
-
+7. Sufficient tests for loading the data from the url & seeing it fits the schema. Elegantly handle such a situation where these fail.
+- All the input data are san through a schema every time they are used and it will inform what are the problems if there are any. Data import tests can be also ran with `python -m unittest`
 
 ## Details
 ### 1. Alcohol
