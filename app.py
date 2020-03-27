@@ -9,7 +9,7 @@ import random
 import logging
 logging.basicConfig(format='%(message)s', level=logging.INFO)
 
-LOCAL = DEBUG = True  # False is for production
+LOCAL = DEBUG = True  # False is only for production
 
 app = Flask(__name__)
 
@@ -71,14 +71,14 @@ def update_meal_plan():
     new_meal_plan = True if request.form.get('new_meal_plan') else False
     if new_meal_plan and LOCAL:
         calculate(days, allergy, low_salt)
+    elif new_meal_plan and not LOCAL:
+        meal_plans, nutrients = get_nutrients_and_meal_plans(
+            days, allergy=allergy, low_salt=low_salt, min_sugar=min_sugar, new_meal_plan=False)
+        return render_template('meal_plan.html', meal_plans=meal_plans, nutrients=nutrients, days=days, server=True)
 
     meal_plans, nutrients = get_nutrients_and_meal_plans(
         days, allergy=allergy, low_salt=low_salt, min_sugar=min_sugar, new_meal_plan=new_meal_plan)
-
-    if new_meal_plan and not LOCAL:
-        return render_template('meal_plan.html', meal_plans=meal_plans, nutrients=nutrients, days=days, server=True)
-    else:
-        return render_template('meal_plan.html', meal_plans=meal_plans, nutrients=nutrients, days=days)
+    return render_template('meal_plan.html', meal_plans=meal_plans, nutrients=nutrients, days=days)
 
 
 @app.route('/meal-plan')
