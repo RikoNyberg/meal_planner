@@ -128,15 +128,15 @@ class DailyMealPlan():
 
     def save_total_nutrients_to_csv(self):
         if self.limits.get('low_salt'):
-            csv_path = f'daily_meal_plans/{self.day}_nutrients_low_salt.csv'
+            csv_path = f'daily_meal_plans/new_low_salt/{self.day}_nutrients_low_salt.csv'
         else:
-            csv_path = f'daily_meal_plans/{self.day}_nutrients.csv'
+            csv_path = f'daily_meal_plans/new/{self.day}_nutrients.csv'
 
         self.get_total_nutrients().to_csv(csv_path)
 
     def save_meal_plan_to_csv(self):
         if self.limits.get('low_salt'):
-            csv_path = f'daily_meal_plans/{self.day}_meal_plan_low_salt.csv'
+            csv_path = f'daily_meal_plans/new_low_salt/{self.day}_meal_plan_low_salt.csv'
         else:
-            csv_path = f'daily_meal_plans/{self.day}_meal_plan.csv'
+            csv_path = f'daily_meal_plans/new/{self.day}_meal_plan.csv'
         self.get_optimal_meal_plan().to_csv(csv_path)

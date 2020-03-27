@@ -1,5 +1,5 @@
 {% macro add_sidebar_item(path, icon, name) %}
-    {% if path|trim("/") == request.path.split("/")[1] %}
+    {% if path|trim("/") == request.path.split("/")[1]|trim("upadate-") %}
         <li class="nav-item active ">
     {% else %}
         <li class="nav-item ">

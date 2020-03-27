@@ -35,15 +35,15 @@ def calculate(days, allergy, low_salt):
     start = time.time()
     for day_count in range(days):
         day_name = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'][day_count % 7]
-        day_name = '_'.join([str(day_count), day_name + '_new'])
+        day_name = str(day_count) + ''
         day = algorithm.DailyMealPlan(
             df, 
             limits={'allergies': [allergy], 'low_salt':low_salt},
             day=day_name,
             prev_meal_plan=previous_day, 
             used_meals=used_meals)
-        
-        logging.info('-'*20, 'Meal Plan:', day_name.upper(), '-'*20)
+        message = ' '.join(['-'*20, 'Meal Plan:', day_name.upper(), '-'*20])
+        logging.info(message)
         meal_plan = day.get_optimal_meal_plan()
         logging.info(meal_plan)
 
@@ -54,12 +54,15 @@ def calculate(days, allergy, low_salt):
         previous_day = day
 
     end = time.time()
-    logging.info('-'*20, 'Running time:', end - start, '-'*20)
+    message = ' '.join(['-'*20, 'Running time:', str(end - start), '-'*20])
+    logging.info(message)
     return 
 
 
 @app.route('/upadate-meal-plan', methods=['GET', 'POST'])
 def update_meal_plan():
+    if not request.form.get('days'):
+        return redirect(url_for('meal_plan'))
     days = request.form.get('days')
     days = int(days)
     allergy = 'lactose' if request.form.get('allergy') else ''
@@ -72,7 +75,7 @@ def update_meal_plan():
     meal_plans, nutrients = get_nutrients_and_meal_plans(
         days, allergy=allergy, low_salt=low_salt, min_sugar=min_sugar, new_meal_plan=new_meal_plan)
 
-    if LOCAL == False:
+    if new_meal_plan and not LOCAL:
         return render_template('meal_plan.html', meal_plans=meal_plans, nutrients=nutrients, days=days, server=True)
     else:
         return render_template('meal_plan.html', meal_plans=meal_plans, nutrients=nutrients, days=days)
@@ -105,17 +108,17 @@ def get_nutrients_and_meal_plans(days, allergy=None, low_salt=None, min_sugar=Tr
         return info_list
     
     # Meal Plans
-    daily_meal_plans_dict = {}
+    meal_plans_dict = {}
     if new_meal_plan:
         if low_salt:
-            path = "daily_meal_plans/*_new_meal_plan_low_salt.csv"
+            path = "daily_meal_plans/new_low_salt/*meal_plan*.csv"
         else:
-            path = "daily_meal_plans/*_new_meal_plan.csv"
+            path = "daily_meal_plans/new/*meal_plan.csv"
     else:
         if low_salt:
-            path = "daily_meal_plans/*_meal_plan_low_salt.csv"
+            path = "daily_meal_plans/pre_low_salt/*meal_plan_low_salt.csv"
         else:
-            path = "daily_meal_plans/*_meal_plan.csv"
+            path = "daily_meal_plans/pre/*meal_plan.csv"
     i = 1
     for fname in glob.glob(path):
         df = pd.read_csv(fname, sep=",")
@@ -126,23 +129,23 @@ def get_nutrients_and_meal_plans(days, allergy=None, low_salt=None, min_sugar=Tr
                      # This can be fixed in the algorithm level
         df['salt'] = df['salt'].div(1000) # mg -> g
         key = int(fname.split('/')[-1].split('_')[0])
-        daily_meal_plans_dict[key] = df.round(1).to_dict('list')
-        # daily_meal_plans_dict[df['sugar'].iloc[-1]] = df.round(1).to_dict('list')
+        meal_plans_dict[key] = df.round(1).to_dict('list')
+        # meal_plans_dict[df['sugar'].iloc[-1]] = df.round(1).to_dict('list')
         i += 1
-    meal_plans = convert_info_to_list_of_dicts(daily_meal_plans_dict, min_sugar, days)
+    meal_plans = convert_info_to_list_of_dicts(meal_plans_dict, min_sugar, days)
 
     # Nutrients
-    daily_nutrients_dict = {}
+    nutrients_dict = {}
     if new_meal_plan:
         if low_salt:
-            path = "daily_meal_plans/*_new_nutrients_low_salt.csv"
+            path = "daily_meal_plans/new_low_salt/*nutrients*.csv"
         else:
-            path = "daily_meal_plans/*_new_nutrients.csv"
+            path = "daily_meal_plans/new/*nutrients.csv"
     else:
         if low_salt:
-            path = "daily_meal_plans/*_nutrients_low_salt.csv"
+            path = "daily_meal_plans/pre_low_salt/*nutrients_low_salt.csv"
         else:
-            path = "daily_meal_plans/*_nutrients.csv"
+            path = "daily_meal_plans/pre/*nutrients.csv"
     i = 1
     for fname in glob.glob(path):
         df = pd.read_csv(fname, sep=",")
@@ -152,11 +155,10 @@ def get_nutrients_and_meal_plans(days, allergy=None, low_salt=None, min_sugar=Tr
             continue # TODO: this causes a slight change of same food category on successive days
                      # This can be fixed in the algorithm level
         key = int(fname.split('/')[-1].split('_')[0])
-        daily_meal_plans_dict[key] = df.round(1).to_dict('list')
-        # daily_nutrients_dict[df['sugar'].iloc[-1]] = df.round(1).to_dict('list')
+        nutrients_dict[key] = df.round(1).to_dict('list')
+        # nutrients_dict[df['sugar'].iloc[-1]] = df.round(1).to_dict('list')
         i += 1
-    nutrients = convert_info_to_list_of_dicts(daily_nutrients_dict, min_sugar, days)
-    
+    nutrients = convert_info_to_list_of_dicts(nutrients_dict, min_sugar, days)
     return meal_plans, nutrients
 
 @app.route('/feedback', methods=['GET', 'POST'])
