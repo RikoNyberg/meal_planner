@@ -21,7 +21,7 @@ def home():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.form.get('password').lower() == 'fourkind':
+    if request.form.get('password'):
         return redirect(url_for('meal_plan', days=request.form['days']))
     return render_template('index.html', wrong_password=True)
 
