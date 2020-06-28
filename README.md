@@ -13,17 +13,15 @@ $ make run
 After this the Meal Planner UI is served in your local port http://0.0.0.0:5000/ and http://0.0.0.0:5000/meal-plan.
 
 ## Run on a server as a website
-Instructions on how to setup https and Nginx-proxy for this website:
-[Host multiple websites with HTTPS on a single server](https://medium.com/@francoisromain/host-multiple-websites-with-https-inside-docker-containers-on-a-single-server-18467484ab95)
 
 First, you have to create an Nginx-proxy to your server for controlling the traffic ([simple instruction here](https://medium.com/@francoisromain/host-multiple-websites-with-https-inside-docker-containers-on-a-single-server-18467484ab95)). After you have gone through the instructions and updated `docker-compose.yml`, you can just download this repo to your server and run the following command in the folder.
 ```
 $ make server
 ```
 
-Then just enjoy you meals :D
+Then just enjoy your meals :D
 
-Ps. If it does not work right away, it might take a few minutes to get the https certificate.
+Ps. It might not work right away, because it takes a few minutes to get the https certificate for the website, so be patient.
 
 
 ## Run tests
@@ -38,9 +36,9 @@ python -m unittest
 1. Total calories per day should be as close to 2000 kcal as possible. 
 - The system is capable to produce exact number but due to roundings and unclear energy calculations (see Details section 7.) these are not always exactly 2000 kcal.
 2. Energy division by macronutrients, as accurately as possible:
-- 50 % of energy should be from carbs - Done
-- 30 % from proteins - Done
-- 20 % from fat - Done
+- 50 % of energy should be from carbs
+- 30 % from proteins
+- 20 % from fat
 3. At least 20 g of fiber per day
 - Due to rounding error, this might sometimes be under 20g and hence, the requirement is currently 25g in the algorithm.
 4. At most 500 g of a single food item per day
